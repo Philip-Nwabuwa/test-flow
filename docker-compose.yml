@@ -1,8 +1,25 @@
-version: "3.9"
+# Compose file for the EC2 deployment.
+#
+# Design notes:
+# - The worker shells out to `docker run` against the host daemon (via the
+#   mounted docker.sock), so any path it passes to `-v <src>:<dst>` must
+#   exist on the host. We achieve this by bind-mounting the repo and the
+#   workspace root at the SAME absolute path inside and outside the
+#   worker container:
+#     /opt/automation:/opt/automation                 (repo clone)
+#     /var/lib/automation-runs:/var/lib/automation-runs  (per-run tmpdirs)
+#   The host is expected to have both directories created and writable.
+# - We deliberately bypass apps/{api,worker}/Dockerfile for this first
+#   deploy — they build a stale dist/ bundle. Instead we run directly
+#   from source via bun inside oven/bun:1.2.5-alpine and install deps on
+#   container start. Slower boot, but keeps the edit → rsync → restart
+#   loop tight. Switch back to Dockerfile-built images once the code
+#   stabilises.
 
 services:
   redis:
     image: redis:7-alpine
+    restart: unless-stopped
     ports:
       - "6379:6379"
     command: redis-server --appendonly yes
@@ -10,28 +27,41 @@ services:
       - redis-data:/data
 
   api:
-    build:
-      context: .
-      dockerfile: apps/api/Dockerfile
+    image: oven/bun:1.2.5-alpine
+    restart: unless-stopped
     env_file:
       - .env
+    working_dir: /opt/automation
+    entrypoint: []
+    command:
+      - sh
+      - -c
+      - "apk add --no-cache libc6-compat && bun install --frozen-lockfile && bun apps/api/src/index.ts"
     ports:
       - "4000:4000"
     depends_on:
       - redis
     volumes:
-      - .:/workspace
+      - /opt/automation:/opt/automation
 
   worker:
-    build:
-      context: .
-      dockerfile: apps/worker/Dockerfile
+    image: oven/bun:1.2.5-alpine
+    restart: unless-stopped
     env_file:
       - .env
+    working_dir: /opt/automation
+    entrypoint: []
+    # docker-cli is required because DockerRuntime shells out to `docker run`
+    # against the host daemon via the mounted docker.sock.
+    command:
+      - sh
+      - -c
+      - "apk add --no-cache docker-cli libc6-compat && bun install --frozen-lockfile && bun apps/worker/src/index.ts"
     depends_on:
       - redis
     volumes:
-      - .:/workspace
+      - /opt/automation:/opt/automation
+      - /var/lib/automation-runs:/var/lib/automation-runs
       - /var/run/docker.sock:/var/run/docker.sock
 
 volumes:

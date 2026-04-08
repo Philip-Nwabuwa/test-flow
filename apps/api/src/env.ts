@@ -17,7 +17,8 @@ const envSchema = z.object({
   WORKER_CONCURRENCY: z.coerce.number().int().positive().default(4),
   VARIABLE_ENCRYPTION_KEY: z.string().min(32),
   RATE_LIMIT_WINDOW_MS: z.coerce.number().int().positive().default(60000),
-  RATE_LIMIT_MAX_REQUESTS: z.coerce.number().int().positive().default(120)
+  RATE_LIMIT_MAX_REQUESTS: z.coerce.number().int().positive().default(120),
+  CORS_ALLOWED_ORIGINS: z.string().optional()
 });
 
 export type AppEnv = z.infer<typeof envSchema>;

@@ -1,3 +1,4 @@
+import cors from "cors";
 import express, { type Express } from "express";
 import { pinoHttp } from "pino-http";
 
@@ -48,6 +49,20 @@ export function createApp(env: AppEnv): AppInstance {
   const scheduleService = new ScheduleService(runQueue);
   const variableService = new VariableService(env.VARIABLE_ENCRYPTION_KEY);
   const opsService = new OpsService(runQueue);
+
+  // CORS must be registered before routes (and before rate-limiting) so that
+  // preflight OPTIONS requests from a browser-hosted frontend are answered
+  // with the right headers instead of falling through to auth/rate-limit.
+  const allowedOrigins = (env.CORS_ALLOWED_ORIGINS ?? "")
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+  app.use(
+    cors({
+      origin: allowedOrigins.length > 0 ? allowedOrigins : true,
+      credentials: true
+    })
+  );
 
   app.use(express.json({ limit: "1mb" }));
   app.use(pinoHttp({ logger }));

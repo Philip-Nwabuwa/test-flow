@@ -49,7 +49,15 @@ export class DockerRuntime {
       );
     }
 
-    const workspaceDir = await mkdtemp(path.join(tmpdir(), "flow-run-"));
+    // When the worker runs inside a container that mounts the host docker
+    // socket, every `docker run -v <src>:<dst>` it issues is interpreted by
+    // the *host* daemon. That means <src> must exist on the host, not just
+    // inside this container. In those deployments, set WORKER_WORKSPACE_ROOT
+    // to a path that is bind-mounted into the worker at the same absolute
+    // path (e.g. /var/lib/automation-runs:/var/lib/automation-runs) so the
+    // tmpdir we create here resolves identically on both sides.
+    const workspaceRoot = process.env.WORKER_WORKSPACE_ROOT ?? tmpdir();
+    const workspaceDir = await mkdtemp(path.join(workspaceRoot, "flow-run-"));
     const payloadPath = path.join(workspaceDir, "payload.json");
     const outputDir = path.join(workspaceDir, "output");
     const resultPath = path.join(outputDir, "result.json");
