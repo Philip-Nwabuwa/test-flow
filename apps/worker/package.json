@@ -1,0 +1,22 @@
+{
+  "name": "@automation/worker",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "bun --env-file=../../.env --watch src/index.ts",
+    "test": "vitest run",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@automation/shared": "workspace:*",
+    "@supabase/supabase-js": "^2.49.1",
+    "bullmq": "^5.43.2",
+    "ioredis": "^5.4.2",
+    "pino": "^9.6.0",
+    "zod": "^3.24.2"
+  }
+}
