@@ -7,7 +7,7 @@ const envSchema = z.object({
   EDGE_FUNCTION_URL: z.string().url(),
   EDGE_FUNCTION_KEY: z.string().min(1),
   RUNTIME_MODE: z.enum(["docker", "direct"]).default("direct"),
-  PLAYWRIGHT_IMAGE: z.string().default("mcr.microsoft.com/playwright:v1.48.0-noble"),
+  PLAYWRIGHT_IMAGE: z.string().default("mcr.microsoft.com/playwright:v1.48.0-jammy"),
   PLAYWRIGHT_DOCKER_NETWORK: z.string().default("bridge"),
   PLAYWRIGHT_RUN_TIMEOUT_MS: z.coerce.number().int().positive().default(300000),
   WORKER_CONCURRENCY: z.coerce.number().int().positive().default(4),

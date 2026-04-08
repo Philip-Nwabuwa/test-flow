@@ -52,7 +52,7 @@ services:
     # Playwright image includes Node.js + Chromium browsers for direct execution.
     # Set RUNTIME_MODE=direct in .env (default) to run tests without Docker-in-Docker.
     # Set RUNTIME_MODE=docker to use the old DockerRuntime (requires docker.sock).
-    image: mcr.microsoft.com/playwright:v1.48.0-noble
+    image: mcr.microsoft.com/playwright:v1.48.0-jammy
     restart: unless-stopped
     env_file:
       - .env
