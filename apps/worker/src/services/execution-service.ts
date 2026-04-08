@@ -8,13 +8,17 @@ import {
   type RunJobPayload
 } from "@automation/shared";
 
-import { DockerRuntime } from "../lib/docker-runtime.js";
+import type { RuntimeResult } from "../lib/docker-runtime.js";
 import { EdgeClient, type ExecutionContext } from "../lib/edge-client.js";
+
+interface TestRuntime {
+  run(payload: Record<string, unknown>): Promise<RuntimeResult>;
+}
 
 export class ExecutionService {
   constructor(
     private readonly edgeClient: EdgeClient,
-    private readonly runtime: DockerRuntime,
+    private readonly runtime: TestRuntime,
     private readonly variableKey: string
   ) {}
 

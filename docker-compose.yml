@@ -49,18 +49,19 @@ services:
       - /opt/automation:/opt/automation
 
   worker:
-    image: oven/bun:1.2.5-alpine
+    # Playwright image includes Node.js + Chromium browsers for direct execution.
+    # Set RUNTIME_MODE=direct in .env (default) to run tests without Docker-in-Docker.
+    # Set RUNTIME_MODE=docker to use the old DockerRuntime (requires docker.sock).
+    image: mcr.microsoft.com/playwright:v1.48.0-noble
     restart: unless-stopped
     env_file:
       - .env
     working_dir: /opt/automation
     entrypoint: []
-    # docker-cli is required because DockerRuntime shells out to `docker run`
-    # against the host daemon via the mounted docker.sock.
     command:
       - sh
       - -c
-      - "apk add --no-cache docker-cli libc6-compat && bun install --frozen-lockfile && bun run --filter @automation/shared build && bun apps/worker/src/index.ts"
+      - "curl -fsSL https://bun.sh/install | bash && export PATH=$$HOME/.bun/bin:$$PATH && bun install --frozen-lockfile && bun run --filter @automation/shared build && bun apps/worker/src/index.ts"
     depends_on:
       - redis
     volumes:
