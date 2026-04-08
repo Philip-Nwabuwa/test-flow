@@ -61,7 +61,7 @@ services:
     command:
       - sh
       - -c
-      - "curl -fsSL https://bun.sh/install | bash && export PATH=$$HOME/.bun/bin:$$PATH && bun install --frozen-lockfile && bun run --filter @automation/shared build && bun apps/worker/src/index.ts"
+      - "apt-get update && apt-get install -y --no-install-recommends unzip && curl -fsSL https://bun.sh/install | bash && export PATH=$$HOME/.bun/bin:$$PATH && bun install && bun run --filter @automation/shared build && bun apps/worker/src/index.ts"
     depends_on:
       - redis
     volumes:
