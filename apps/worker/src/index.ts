@@ -9,6 +9,7 @@ import { DockerRuntime } from "./lib/docker-runtime.js";
 import { EdgeClient } from "./lib/edge-client.js";
 import { ExecutionService } from "./services/execution-service.js";
 import { SchedulerReconciler } from "./services/scheduler-reconciler.js";
+import { QueuePoller } from "./services/queue-poller.js";
 
 const RUN_QUEUE_NAME = "flow-runs";
 
@@ -36,8 +37,10 @@ const worker = new Worker<RunJobPayload>(
 );
 
 const reconciler = new SchedulerReconciler(edgeClient, queue);
+const poller = new QueuePoller(edgeClient, queue, logger);
 
 await reconciler.reconcile();
+poller.start();
 
 worker.on("completed", (job) => {
   logger.info({ jobId: job.id }, "Run completed");
@@ -47,4 +50,4 @@ worker.on("failed", (job, error) => {
   logger.error({ jobId: job?.id, error }, "Run failed");
 });
 
-logger.info({ concurrency: env.WORKER_CONCURRENCY }, "Worker started");
+logger.info({ concurrency: env.WORKER_CONCURRENCY }, "Worker started (DB poller active)");

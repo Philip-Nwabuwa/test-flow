@@ -13,6 +13,11 @@ export interface ExecutionContext {
   variables: Record<string, string>;
 }
 
+export interface PollQueueItem extends RunJobPayload {
+  status: string;
+  createdAt: string;
+}
+
 export class EdgeClient {
   constructor(
     private readonly baseUrl: string,
@@ -67,6 +72,10 @@ export class EdgeClient {
     return this.call<(FlowSchedule & { project_id: string })[]>("worker-schedule", {
       action: "reconcile"
     });
+  }
+
+  async pollQueue(limit = 10): Promise<PollQueueItem[]> {
+    return this.call<PollQueueItem[]>("worker-poll-queue", { limit });
   }
 
   private async call<T>(functionName: string, body: unknown): Promise<T> {

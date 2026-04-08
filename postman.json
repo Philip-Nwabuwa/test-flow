@@ -1,0 +1,1028 @@
+{
+  "info": {
+    "_postman_id": "0b8fd6d5-7f2b-4cf7-9739-54b0a3c98c9d",
+    "name": "Playwright Docker Automation Backend",
+    "description": "Postman collection generated from the Express route mounts in apps/api/src/app.ts and the request schemas in packages/shared/src/validation.ts. Authenticated requests inherit the collection bearer token. Public health checks and /internal ops routes are explicitly marked as no-auth.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{bearerToken}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:4000"
+    },
+    {
+      "key": "bearerToken",
+      "value": ""
+    },
+    {
+      "key": "projectId",
+      "value": "11111111-1111-1111-1111-111111111111"
+    },
+    {
+      "key": "flowId",
+      "value": "22222222-2222-2222-2222-222222222222"
+    },
+    {
+      "key": "versionId",
+      "value": "33333333-3333-3333-3333-333333333333"
+    },
+    {
+      "key": "runId",
+      "value": "44444444-4444-4444-4444-444444444444"
+    },
+    {
+      "key": "scheduleId",
+      "value": "55555555-5555-5555-5555-555555555555"
+    },
+    {
+      "key": "variableId",
+      "value": "66666666-6666-6666-6666-666666666666"
+    },
+    {
+      "key": "timezone",
+      "value": "Africa/Lagos"
+    }
+  ],
+  "item": [
+    {
+      "name": "System",
+      "auth": {
+        "type": "noauth"
+      },
+      "description": "Public system checks mounted before auth under /v1.",
+      "item": [
+        {
+          "name": "Live Health",
+          "request": {
+            "method": "GET",
+            "description": "Liveness probe. Returns 200 with { ok: true } when the API process is up.",
+            "url": {
+              "raw": "{{baseUrl}}/v1/health/live",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "v1",
+                "health",
+                "live"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Ready Health",
+          "request": {
+            "method": "GET",
+            "description": "Readiness probe. Returns 200 with { ok: true } when the API can query Supabase, otherwise 503 with { ok: false }.",
+            "url": {
+              "raw": "{{baseUrl}}/v1/health/ready",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "v1",
+                "health",
+                "ready"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Identity",
+      "description": "Authenticated identity endpoint mounted under /v1.",
+      "item": [
+        {
+          "name": "Get Current User",
+          "request": {
+            "method": "GET",
+            "description": "Returns the resolved auth context for the bearer token. Requires Authorization: Bearer {{bearerToken}}.",
+            "url": {
+              "raw": "{{baseUrl}}/v1/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "v1",
+                "me"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Dashboard",
+      "description": "Authenticated dashboard endpoints under /v1/dashboard.",
+      "item": [
+        {
+          "name": "Summary",
+          "request": {
+            "method": "GET",
+            "description": "Returns dashboard summary metrics for the authenticated user.",
+            "url": {
+              "raw": "{{baseUrl}}/v1/dashboard/summary",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "v1",
+                "dashboard",
+                "summary"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Problems",
+          "request": {
+            "method": "GET",
+            "description": "Returns current problem signals for the authenticated user.",
+            "url": {
+              "raw": "{{baseUrl}}/v1/dashboard/problems",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "v1",
+                "dashboard",
+                "problems"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Insights",
+          "request": {
+            "method": "GET",
+            "description": "Returns derived dashboard insights for the authenticated user.",
+            "url": {
+              "raw": "{{baseUrl}}/v1/dashboard/insights",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "v1",
+                "dashboard",
+                "insights"
+              ]
+            }
+          }
+        },
+        {
+          "name": "History",
+          "request": {
+            "method": "GET",
+            "description": "Returns dashboard history. Optional query params: status, trigger, flowId.",
+            "url": {
+              "raw": "{{baseUrl}}/v1/dashboard/history",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "v1",
+                "dashboard",
+                "history"
+              ],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "failed",
+                  "description": "Optional run status filter.",
+                  "disabled": true
+                },
+                {
+                  "key": "trigger",
+                  "value": "manual",
+                  "description": "Optional trigger filter.",
+                  "disabled": true
+                },
+                {
+                  "key": "flowId",
+                  "value": "{{flowId}}",
+                  "description": "Optional flow UUID filter.",
+                  "disabled": true
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Flows",
+      "description": "Authenticated flow management endpoints under /v1/flows.",
+      "item": [
+        {
+          "name": "List Flows",
+          "request": {
+            "method": "GET",
+            "description": "Lists flows visible to the authenticated user. Optional query params: search, status.",
+            "url": {
+              "raw": "{{baseUrl}}/v1/flows",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "v1",
+                "flows"
+              ],
+              "query": [
+                {
+                  "key": "search",
+                  "value": "checkout",
+                  "description": "Optional free-text search term.",
+                  "disabled": true
+                },
+                {
+                  "key": "status",
+                  "value": "active",
+                  "description": "Optional flow status filter.",
+                  "disabled": true
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Flow",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "description": "Creates a flow. The body matches flowCreateSchema. draft.steps requires at least one step. Allowed actionType values: click, input, select, navigate, wait, scroll, KeyPress, assert. Allowed healthStatus values: healthy, failing, untested.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"projectId\": \"{{projectId}}\",\n  \"name\": \"Checkout flow\",\n  \"targetUrl\": \"https://example.com/checkout\",\n  \"flowType\": \"ui\",\n  \"draft\": {\n    \"intent\": \"Validate checkout can complete successfully.\",\n    \"targetUrl\": \"https://example.com/checkout\",\n    \"executionMode\": \"headed\",\n    \"healthStatus\": \"untested\",\n    \"steps\": [\n      {\n        \"sortOrder\": 0,\n        \"actionType\": \"navigate\",\n        \"semanticLabel\": \"Open checkout page\",\n        \"selector\": null,\n        \"value\": \"https://example.com/checkout\",\n        \"expectedOutcome\": \"Checkout page loads\",\n        \"timeoutMs\": 30000\n      },\n      {\n        \"sortOrder\": 1,\n        \"actionType\": \"click\",\n        \"semanticLabel\": \"Click checkout button\",\n        \"selector\": \"button[data-testid='checkout']\",\n        \"value\": null,\n        \"expectedOutcome\": \"Payment form is visible\",\n        \"timeoutMs\": 10000\n      }\n    ]\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/v1/flows",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "v1",
+                "flows"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Flow",
+          "request": {
+            "method": "GET",
+            "description": "Fetches a single flow by UUID.",
+            "url": {
+              "raw": "{{baseUrl}}/v1/flows/{{flowId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "v1",
+                "flows",
+                "{{flowId}}"
+              ],
+              "variable": [
+                {
+                  "key": "flowId",
+                  "value": "{{flowId}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Flow",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "description": "Updates a flow. All fields are optional. Allowed status values: draft, active, paused, passed, failed. Allowed healthStatus values: healthy, failing, untested.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Checkout flow v2\",\n  \"status\": \"active\",\n  \"targetUrl\": \"https://example.com/checkout\",\n  \"flowType\": \"ui\",\n  \"intent\": \"Validate checkout and payment success.\",\n  \"healthStatus\": \"healthy\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/v1/flows/{{flowId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "v1",
+                "flows",
+                "{{flowId}}"
+              ],
+              "variable": [
+                {
+                  "key": "flowId",
+                  "value": "{{flowId}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Duplicate Flow",
+          "request": {
+            "method": "POST",
+            "description": "Duplicates the referenced flow and returns the new copy.",
+            "url": {
+              "raw": "{{baseUrl}}/v1/flows/{{flowId}}/duplicate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "v1",
+                "flows",
+                "{{flowId}}",
+                "duplicate"
+              ],
+              "variable": [
+                {
+                  "key": "flowId",
+                  "value": "{{flowId}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Save Draft",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "description": "Replaces the draft payload for a flow. The body matches flowDraftPayloadSchema and must contain at least one step.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"intent\": \"Validate checkout can complete successfully.\",\n  \"targetUrl\": \"https://example.com/checkout\",\n  \"executionMode\": \"headed\",\n  \"healthStatus\": \"untested\",\n  \"steps\": [\n    {\n      \"sortOrder\": 0,\n      \"actionType\": \"navigate\",\n      \"semanticLabel\": \"Open checkout page\",\n      \"selector\": null,\n      \"value\": \"https://example.com/checkout\",\n      \"expectedOutcome\": \"Checkout page loads\",\n      \"timeoutMs\": 30000\n    },\n    {\n      \"sortOrder\": 1,\n      \"actionType\": \"input\",\n      \"semanticLabel\": \"Enter email\",\n      \"selector\": \"input[name='email']\",\n      \"value\": \"user@example.com\",\n      \"expectedOutcome\": \"Email field is populated\",\n      \"timeoutMs\": 10000\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/v1/flows/{{flowId}}/draft",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "v1",
+                "flows",
+                "{{flowId}}",
+                "draft"
+              ],
+              "variable": [
+                {
+                  "key": "flowId",
+                  "value": "{{flowId}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Publish Flow",
+          "request": {
+            "method": "POST",
+            "description": "Publishes the latest draft for the flow and creates a new version.",
+            "url": {
+              "raw": "{{baseUrl}}/v1/flows/{{flowId}}/publish",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "v1",
+                "flows",
+                "{{flowId}}",
+                "publish"
+              ],
+              "variable": [
+                {
+                  "key": "flowId",
+                  "value": "{{flowId}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "List Flow Versions",
+          "request": {
+            "method": "GET",
+            "description": "Lists published versions for the referenced flow.",
+            "url": {
+              "raw": "{{baseUrl}}/v1/flows/{{flowId}}/versions",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "v1",
+                "flows",
+                "{{flowId}}",
+                "versions"
+              ],
+              "variable": [
+                {
+                  "key": "flowId",
+                  "value": "{{flowId}}"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Runs",
+      "description": "Authenticated run execution endpoints mounted under /v1.",
+      "item": [
+        {
+          "name": "Create Manual Run",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "description": "Creates a manual run for a flow. All body fields are optional except idempotencyKey must be at least 8 chars if provided.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"versionId\": \"{{versionId}}\",\n  \"environment\": \"production\",\n  \"idempotencyKey\": \"manual-run-0001\",\n  \"reason\": \"Manual validation before release\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/v1/flows/{{flowId}}/runs",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "v1",
+                "flows",
+                "{{flowId}}",
+                "runs"
+              ],
+              "variable": [
+                {
+                  "key": "flowId",
+                  "value": "{{flowId}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "List Flow Runs",
+          "request": {
+            "method": "GET",
+            "description": "Lists runs for a specific flow.",
+            "url": {
+              "raw": "{{baseUrl}}/v1/flows/{{flowId}}/runs",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "v1",
+                "flows",
+                "{{flowId}}",
+                "runs"
+              ],
+              "variable": [
+                {
+                  "key": "flowId",
+                  "value": "{{flowId}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Run",
+          "request": {
+            "method": "GET",
+            "description": "Returns the full run record for a specific run UUID.",
+            "url": {
+              "raw": "{{baseUrl}}/v1/runs/{{runId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "v1",
+                "runs",
+                "{{runId}}"
+              ],
+              "variable": [
+                {
+                  "key": "runId",
+                  "value": "{{runId}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Run Steps",
+          "request": {
+            "method": "GET",
+            "description": "Returns only the stepResults array for a run.",
+            "url": {
+              "raw": "{{baseUrl}}/v1/runs/{{runId}}/steps",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "v1",
+                "runs",
+                "{{runId}}",
+                "steps"
+              ],
+              "variable": [
+                {
+                  "key": "runId",
+                  "value": "{{runId}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Run Artifacts",
+          "request": {
+            "method": "GET",
+            "description": "Returns artifacts associated with a run.",
+            "url": {
+              "raw": "{{baseUrl}}/v1/runs/{{runId}}/artifacts",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "v1",
+                "runs",
+                "{{runId}}",
+                "artifacts"
+              ],
+              "variable": [
+                {
+                  "key": "runId",
+                  "value": "{{runId}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Retry Run",
+          "request": {
+            "method": "POST",
+            "description": "Creates a retry run from an existing run.",
+            "url": {
+              "raw": "{{baseUrl}}/v1/runs/{{runId}}/retry",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "v1",
+                "runs",
+                "{{runId}}",
+                "retry"
+              ],
+              "variable": [
+                {
+                  "key": "runId",
+                  "value": "{{runId}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Cancel Run",
+          "request": {
+            "method": "POST",
+            "description": "Cancels an in-flight run.",
+            "url": {
+              "raw": "{{baseUrl}}/v1/runs/{{runId}}/cancel",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "v1",
+                "runs",
+                "{{runId}}",
+                "cancel"
+              ],
+              "variable": [
+                {
+                  "key": "runId",
+                  "value": "{{runId}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Run Events SSE",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "text/event-stream"
+              }
+            ],
+            "description": "Server-sent events stream for run updates. The API emits JSON payloads when the run state changes.",
+            "url": {
+              "raw": "{{baseUrl}}/v1/runs/{{runId}}/events",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "v1",
+                "runs",
+                "{{runId}}",
+                "events"
+              ],
+              "variable": [
+                {
+                  "key": "runId",
+                  "value": "{{runId}}"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Schedules",
+      "description": "Authenticated schedule endpoints mounted under /v1.",
+      "item": [
+        {
+          "name": "List Flow Schedules",
+          "request": {
+            "method": "GET",
+            "description": "Lists schedules for a flow.",
+            "url": {
+              "raw": "{{baseUrl}}/v1/flows/{{flowId}}/schedules",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "v1",
+                "flows",
+                "{{flowId}}",
+                "schedules"
+              ],
+              "variable": [
+                {
+                  "key": "flowId",
+                  "value": "{{flowId}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Schedule",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "description": "Creates a schedule for a flow. Body matches scheduleSchema. frequency must be hourly or daily. For daily schedules include hour. For hourly schedules include everyHours. retryPolicy is required.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"frequency\": \"daily\",\n  \"timezone\": \"{{timezone}}\",\n  \"minute\": 0,\n  \"hour\": 9,\n  \"everyHours\": null,\n  \"environment\": \"production\",\n  \"enabled\": true,\n  \"retryPolicy\": {\n    \"attempts\": 3,\n    \"backoffType\": \"exponential\",\n    \"backoffMs\": 60000\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/v1/flows/{{flowId}}/schedules",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "v1",
+                "flows",
+                "{{flowId}}",
+                "schedules"
+              ],
+              "variable": [
+                {
+                  "key": "flowId",
+                  "value": "{{flowId}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Schedule",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "description": "Partially updates a schedule. Body matches scheduleUpdateSchema, so every field is optional.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"enabled\": false,\n  \"minute\": 30,\n  \"hour\": 10,\n  \"timezone\": \"{{timezone}}\",\n  \"retryPolicy\": {\n    \"attempts\": 2,\n    \"backoffType\": \"fixed\",\n    \"backoffMs\": 30000\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/v1/schedules/{{scheduleId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "v1",
+                "schedules",
+                "{{scheduleId}}"
+              ],
+              "variable": [
+                {
+                  "key": "scheduleId",
+                  "value": "{{scheduleId}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Pause Schedule",
+          "request": {
+            "method": "POST",
+            "description": "Pauses a schedule.",
+            "url": {
+              "raw": "{{baseUrl}}/v1/schedules/{{scheduleId}}/pause",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "v1",
+                "schedules",
+                "{{scheduleId}}",
+                "pause"
+              ],
+              "variable": [
+                {
+                  "key": "scheduleId",
+                  "value": "{{scheduleId}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Resume Schedule",
+          "request": {
+            "method": "POST",
+            "description": "Resumes a schedule.",
+            "url": {
+              "raw": "{{baseUrl}}/v1/schedules/{{scheduleId}}/resume",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "v1",
+                "schedules",
+                "{{scheduleId}}",
+                "resume"
+              ],
+              "variable": [
+                {
+                  "key": "scheduleId",
+                  "value": "{{scheduleId}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Schedule",
+          "request": {
+            "method": "DELETE",
+            "description": "Deletes a schedule. Successful responses return 204 No Content.",
+            "url": {
+              "raw": "{{baseUrl}}/v1/schedules/{{scheduleId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "v1",
+                "schedules",
+                "{{scheduleId}}"
+              ],
+              "variable": [
+                {
+                  "key": "scheduleId",
+                  "value": "{{scheduleId}}"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Variables",
+      "description": "Authenticated variable endpoints mounted under /v1/variables.",
+      "item": [
+        {
+          "name": "List Variables",
+          "request": {
+            "method": "GET",
+            "description": "Lists variables accessible to the authenticated user.",
+            "url": {
+              "raw": "{{baseUrl}}/v1/variables",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "v1",
+                "variables"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Variable",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "description": "Creates a variable. name must be upper snake case and value must be 1 to 4000 chars.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"projectId\": \"{{projectId}}\",\n  \"flowId\": \"{{flowId}}\",\n  \"name\": \"LOGIN_EMAIL\",\n  \"value\": \"user@example.com\",\n  \"description\": \"Credential used for login automation\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/v1/variables",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "v1",
+                "variables"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Variable",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "description": "Partially updates a variable. Body is variableSchema.partial(), so every field is optional.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"projectId\": \"{{projectId}}\",\n  \"flowId\": \"{{flowId}}\",\n  \"name\": \"LOGIN_EMAIL\",\n  \"value\": \"updated-user@example.com\",\n  \"description\": \"Updated credential for login automation\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/v1/variables/{{variableId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "v1",
+                "variables",
+                "{{variableId}}"
+              ],
+              "variable": [
+                {
+                  "key": "variableId",
+                  "value": "{{variableId}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Variable",
+          "request": {
+            "method": "DELETE",
+            "description": "Deletes a variable. Successful responses return 204 No Content.",
+            "url": {
+              "raw": "{{baseUrl}}/v1/variables/{{variableId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "v1",
+                "variables",
+                "{{variableId}}"
+              ],
+              "variable": [
+                {
+                  "key": "variableId",
+                  "value": "{{variableId}}"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Internal",
+      "auth": {
+        "type": "noauth"
+      },
+      "description": "Operational routes mounted under /internal. These are not behind the /v1 bearer-token auth middleware.",
+      "item": [
+        {
+          "name": "Reconcile Schedules",
+          "request": {
+            "method": "POST",
+            "description": "Triggers schedule reconciliation and returns { ok: true }.",
+            "url": {
+              "raw": "{{baseUrl}}/internal/reconcile-schedules",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "internal",
+                "reconcile-schedules"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Queue Stats",
+          "request": {
+            "method": "GET",
+            "description": "Returns queue statistics from OpsService.",
+            "url": {
+              "raw": "{{baseUrl}}/internal/queues",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "internal",
+                "queues"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Failed Jobs",
+          "request": {
+            "method": "GET",
+            "description": "Returns failed jobs. Optional query param: limit, parsed as Number(limit).",
+            "url": {
+              "raw": "{{baseUrl}}/internal/queues/failed",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "internal",
+                "queues",
+                "failed"
+              ],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "10",
+                  "description": "Optional maximum number of failed jobs to return.",
+                  "disabled": true
+                }
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
