@@ -20,6 +20,17 @@ export type StepActionType =
   | "KeyPress"
   | "assert";
 export type BackoffType = "fixed" | "exponential";
+export type AuthoringSessionStatus = "starting" | "ready" | "paused" | "ended" | "error";
+export type AuthoringTokenPurpose = "embed" | "events";
+export type AuthoringEventType =
+  | "session.ready"
+  | "session.loading"
+  | "session.error"
+  | "session.ended"
+  | "page.navigated"
+  | "input.requested"
+  | "step.suggested"
+  | "credential.hint";
 
 export interface RetryPolicy {
   attempts: number;
@@ -178,6 +189,131 @@ export interface FlowStepResult {
   output?: Record<string, unknown>;
 }
 
+export interface AuthoringSession {
+  sessionId: string;
+  projectId: string;
+  flowId: string | null;
+  userId: string;
+  status: AuthoringSessionStatus;
+  targetUrl: string;
+  currentUrl: string | null;
+  capturePaused: boolean;
+  createdAt: string;
+  updatedAt: string;
+  lastActivityAt: string;
+  expiresAt: string;
+}
+
+export interface AuthoringSessionCreateInput {
+  projectId: string;
+  flowId?: string | null;
+  targetUrl: string;
+}
+
+export interface AuthoringSessionConnection extends AuthoringSession {
+  embedUrl: string;
+  eventsUrl: string;
+}
+
+export interface AuthoringStepSuggestion {
+  step: FlowStep;
+  draftStep: FlowStep;
+  selector: string | null;
+  pageUrl: string;
+  confidence: number;
+  rawEventType: "click" | "select" | "input";
+  createdAt: string;
+}
+
+export interface AuthoringInputRequest {
+  selector: string | null;
+  semanticLabel: string;
+  inputType: string | null;
+  pageUrl: string;
+  fieldTag: string;
+}
+
+export interface AuthoringInputSubmitInput {
+  value: string;
+  selector?: string | null;
+  semanticLabel: string;
+  inputType?: string | null;
+}
+
+export interface AuthoringCredentialHint {
+  kind: "email" | "password";
+  selector: string | null;
+  semanticLabel: string;
+}
+
+interface AuthoringEventBase {
+  id: string;
+  type: AuthoringEventType;
+  sessionId: string;
+  createdAt: string;
+}
+
+export interface SessionReadyEvent extends AuthoringEventBase {
+  type: "session.ready";
+  data: {
+    currentUrl: string;
+    expiresAt: string;
+  };
+}
+
+export interface SessionLoadingEvent extends AuthoringEventBase {
+  type: "session.loading";
+  data: {
+    targetUrl: string;
+  };
+}
+
+export interface SessionErrorEvent extends AuthoringEventBase {
+  type: "session.error";
+  data: {
+    message: string;
+  };
+}
+
+export interface SessionEndedEvent extends AuthoringEventBase {
+  type: "session.ended";
+  data: {
+    reason: string;
+  };
+}
+
+export interface PageNavigatedEvent extends AuthoringEventBase {
+  type: "page.navigated";
+  data: {
+    url: string;
+  };
+}
+
+export interface InputRequestedEvent extends AuthoringEventBase {
+  type: "input.requested";
+  data: AuthoringInputRequest;
+}
+
+export interface StepSuggestedEvent extends AuthoringEventBase {
+  type: "step.suggested";
+  data: AuthoringStepSuggestion;
+}
+
+export interface CredentialHintEvent extends AuthoringEventBase {
+  type: "credential.hint";
+  data: AuthoringCredentialHint;
+}
+
+export type AuthoringEvent =
+  | SessionReadyEvent
+  | SessionLoadingEvent
+  | SessionErrorEvent
+  | SessionEndedEvent
+  | PageNavigatedEvent
+  | InputRequestedEvent
+  | StepSuggestedEvent
+  | CredentialHintEvent;
+
 export interface ArtifactRecord {
   id: string;
   runId: string;
@@ -206,6 +342,12 @@ export interface RunJobPayload {
   environment: string | null;
   idempotencyKey: string;
   retryOfRunId?: string | null;
+}
+
+export interface AuthoringTokenClaims {
+  sessionId: string;
+  userId: string;
+  purpose: AuthoringTokenPurpose;
 }
 
 export interface SchedulerJobPayload {

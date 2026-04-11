@@ -1,3 +1,4 @@
+export * from "./authoring.js";
 export * from "./crypto.js";
 export * from "./failures.js";
 export * from "./scheduling.js";

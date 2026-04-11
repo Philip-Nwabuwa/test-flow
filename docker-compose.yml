@@ -48,6 +48,24 @@ services:
     volumes:
       - /opt/automation:/opt/automation
 
+  recorder:
+    image: mcr.microsoft.com/playwright:v1.48.0-jammy
+    restart: unless-stopped
+    env_file:
+      - .env
+    working_dir: /opt/automation
+    entrypoint: []
+    command:
+      - sh
+      - -c
+      - "apt-get update && apt-get install -y --no-install-recommends xvfb x11vnc novnc curl && curl -fsSL https://bun.sh/install | bash && export PATH=$$HOME/.bun/bin:$$PATH && bun install && bun run --filter @automation/shared build && bun apps/recorder/src/index.ts"
+    ports:
+      - "4100:4100"
+    depends_on:
+      - redis
+    volumes:
+      - /opt/automation:/opt/automation
+
   worker:
     # Playwright image includes Node.js + Chromium browsers for direct execution.
     # Set RUNTIME_MODE=direct in .env (default) to run tests without Docker-in-Docker.

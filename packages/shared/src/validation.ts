@@ -65,6 +65,19 @@ export const runCreateSchema = z.object({
   reason: z.string().max(500).optional()
 });
 
+export const authoringSessionCreateSchema = z.object({
+  projectId: z.string().uuid(),
+  flowId: z.string().uuid().nullish(),
+  targetUrl: z.string().url()
+});
+
+export const authoringInputSubmitSchema = z.object({
+  value: z.string().min(1).max(4_000),
+  selector: z.string().max(2_000).nullish(),
+  semanticLabel: z.string().min(1).max(255),
+  inputType: z.string().max(100).nullish()
+});
+
 const scheduleBaseSchema = z.object({
   frequency: z.enum(["hourly", "daily"]),
   timezone: z.string().min(1).max(100),

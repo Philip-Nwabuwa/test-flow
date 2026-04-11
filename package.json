@@ -8,12 +8,13 @@
     "packages/*"
   ],
   "scripts": {
-    "build": "bun run --filter @automation/shared build && bun run --filter @automation/api build && bun run --filter @automation/worker build",
-    "dev": "concurrently \"bun run dev:api\" \"bun run dev:worker\"",
+    "build": "bun run --filter @automation/shared build && bun run --filter @automation/api build && bun run --filter @automation/worker build && bun run --filter @automation/recorder build",
+    "dev": "concurrently \"bun run dev:api\" \"bun run dev:worker\" \"bun run dev:recorder\"",
     "dev:api": "bun run --filter @automation/api dev",
     "dev:worker": "bun run --filter @automation/worker dev",
-    "test": "bun run --filter @automation/shared test && bun run --filter @automation/api test && bun run --filter @automation/worker test",
-    "typecheck": "bun run --filter @automation/shared build && bun run --filter @automation/api typecheck && bun run --filter @automation/worker typecheck"
+    "dev:recorder": "bun run --filter @automation/recorder dev",
+    "test": "bun run --filter @automation/shared test && bun run --filter @automation/api test && bun run --filter @automation/worker test && bun run --filter @automation/recorder test",
+    "typecheck": "bun run --filter @automation/shared build && bun run --filter @automation/api typecheck && bun run --filter @automation/worker typecheck && bun run --filter @automation/recorder typecheck"
   },
   "devDependencies": {
     "@types/node": "^22.13.9",

@@ -1,0 +1,27 @@
+{
+  "name": "@automation/recorder",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "bun --env-file=../../.env --watch src/index.ts",
+    "test": "vitest run",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@automation/shared": "workspace:*",
+    "express": "^4.21.2",
+    "ioredis": "^5.4.2",
+    "playwright": "1.48.0",
+    "pino": "^9.6.0",
+    "zod": "^3.24.2",
+    "ws": "^8.18.0"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.1",
+    "@types/ws": "^8.18.1"
+  }
+}
