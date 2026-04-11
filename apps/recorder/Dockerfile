@@ -6,7 +6,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 ENV TZ=Etc/UTC
 
 RUN apt-get update \
-  && apt-get install -y --no-install-recommends xvfb x11vnc novnc \
+  && apt-get install -y --no-install-recommends xvfb x11vnc novnc unzip \
   && rm -rf /var/lib/apt/lists/*
 
 COPY package.json tsconfig.base.json ./
