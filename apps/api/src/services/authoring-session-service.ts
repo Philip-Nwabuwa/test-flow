@@ -12,7 +12,7 @@ import {
 } from "@automation/shared";
 
 import { HttpError } from "../lib/http.js";
-import { AuthoringRecorderClient } from "../lib/authoring-recorder-client.js";
+import { AuthoringRecorderClient, RecorderRequestError } from "../lib/authoring-recorder-client.js";
 
 export class AuthoringSessionService {
   constructor(
@@ -31,12 +31,14 @@ export class AuthoringSessionService {
   ): Promise<AuthoringSessionConnection> {
     await this.assertFlowAccess(supabase, auth, input.projectId, input.flowId ?? null);
 
-    const session = await this.recorder.createSession({
-      userId: auth.userId,
-      projectId: input.projectId,
-      flowId: input.flowId ?? null,
-      targetUrl: input.targetUrl
-    });
+    const session = await this.callRecorder(() =>
+      this.recorder.createSession({
+        userId: auth.userId,
+        projectId: input.projectId,
+        flowId: input.flowId ?? null,
+        targetUrl: input.targetUrl
+      })
+    );
 
     return this.toConnection(session);
   }
@@ -48,25 +50,25 @@ export class AuthoringSessionService {
 
   async submitInput(auth: AuthContext, sessionId: string, input: AuthoringInputSubmitInput) {
     await this.requireAccessibleSession(auth, sessionId);
-    await this.recorder.submitInput(sessionId, input);
+    await this.callRecorder(() => this.recorder.submitInput(sessionId, input));
     return { ok: true };
   }
 
   async pause(auth: AuthContext, sessionId: string): Promise<AuthoringSessionConnection> {
     await this.requireAccessibleSession(auth, sessionId);
-    const session = await this.recorder.pause(sessionId);
+    const session = await this.callRecorder(() => this.recorder.pause(sessionId));
     return this.toConnection(session);
   }
 
   async resume(auth: AuthContext, sessionId: string): Promise<AuthoringSessionConnection> {
     await this.requireAccessibleSession(auth, sessionId);
-    const session = await this.recorder.resume(sessionId);
+    const session = await this.callRecorder(() => this.recorder.resume(sessionId));
     return this.toConnection(session);
   }
 
   async end(auth: AuthContext, sessionId: string) {
     await this.requireAccessibleSession(auth, sessionId);
-    await this.recorder.endSession(sessionId);
+    await this.callRecorder(() => this.recorder.endSession(sessionId));
     return { ok: true };
   }
 
@@ -157,5 +159,17 @@ export class AuthoringSessionService {
       embedUrl: `${this.recorderPublicBaseUrl}/embed/${encodeURIComponent(session.sessionId)}?token=${encodeURIComponent(embedToken)}`,
       eventsUrl: `${this.apiPublicBaseUrl}/v1/authoring-sessions/${encodeURIComponent(session.sessionId)}/events?token=${encodeURIComponent(eventsToken)}`
     };
+  }
+
+  private async callRecorder<T>(operation: () => Promise<T>): Promise<T> {
+    try {
+      return await operation();
+    } catch (error) {
+      if (error instanceof RecorderRequestError) {
+        throw new HttpError(502, `Recorder error (${error.statusCode}): ${error.message}`);
+      }
+
+      throw error;
+    }
   }
 }

@@ -8,6 +8,16 @@ interface RecorderCreatePayload extends AuthoringSessionCreateInput {
   userId: string;
 }
 
+export class RecorderRequestError extends Error {
+  constructor(
+    public readonly statusCode: number,
+    message: string,
+    public readonly responseBody: string
+  ) {
+    super(message);
+  }
+}
+
 export class AuthoringRecorderClient {
   constructor(
     private readonly baseUrl: string,
@@ -70,7 +80,21 @@ export class AuthoringRecorderClient {
 
     if (!response.ok) {
       const text = await response.text();
-      throw new Error(`Recorder request failed (${response.status}): ${text}`);
+      let message = `Recorder request failed (${response.status})`;
+      try {
+        const parsed = JSON.parse(text) as { error?: string };
+        if (typeof parsed.error === "string" && parsed.error.trim().length > 0) {
+          message = parsed.error;
+        } else if (text.trim().length > 0) {
+          message = text;
+        }
+      } catch {
+        if (text.trim().length > 0) {
+          message = text;
+        }
+      }
+
+      throw new RecorderRequestError(response.status, message, text);
     }
 
     if (response.status === 204) {

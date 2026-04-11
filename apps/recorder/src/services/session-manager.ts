@@ -249,6 +249,14 @@ export class SessionManager {
       return activeSession.session;
     } catch (error) {
       const message = error instanceof Error ? error.message : "Failed to start authoring session";
+      this.logger.error(
+        {
+          error,
+          sessionId: session.sessionId,
+          targetUrl: input.targetUrl
+        },
+        "Failed to start authoring session"
+      );
       await this.store.appendEvent(session.sessionId, {
         id: "",
         type: "session.error",
