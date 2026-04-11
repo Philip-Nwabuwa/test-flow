@@ -7,6 +7,7 @@ import { AuthoringSessionStore } from "@automation/shared";
 
 import { AuthService } from "./lib/auth.js";
 import { AuthoringRecorderClient } from "./lib/authoring-recorder-client.js";
+import { isAllowedOrigin, parseAllowedOrigins } from "./lib/cors.js";
 import { createRunQueue } from "./lib/queue.js";
 import { createRedisConnection } from "./lib/redis.js";
 import { errorHandler, notFoundHandler } from "./middleware/errors.js";
@@ -69,13 +70,17 @@ export function createApp(env: AppEnv): AppInstance {
   // CORS must be registered before routes (and before rate-limiting) so that
   // preflight OPTIONS requests from a browser-hosted frontend are answered
   // with the right headers instead of falling through to auth/rate-limit.
-  const allowedOrigins = (env.CORS_ALLOWED_ORIGINS ?? "")
-    .split(",")
-    .map((s) => s.trim())
-    .filter(Boolean);
+  const allowedOrigins = parseAllowedOrigins(env.CORS_ALLOWED_ORIGINS);
   app.use(
     cors({
-      origin: allowedOrigins.length > 0 ? allowedOrigins : true,
+      origin: (origin, callback) => {
+        if (isAllowedOrigin(origin, allowedOrigins)) {
+          callback(null, true);
+          return;
+        }
+
+        callback(new Error(`Origin ${origin ?? "(none)"} is not allowed by CORS`));
+      },
       credentials: true
     })
   );
