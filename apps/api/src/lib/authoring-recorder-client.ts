@@ -69,14 +69,20 @@ export class AuthoringRecorderClient {
       body?: unknown;
     }
   ): Promise<T> {
-    const response = await fetch(`${this.baseUrl}${path}`, {
-      method: input.method,
-      headers: {
-        "Content-Type": "application/json",
-        "x-recorder-key": this.apiKey
-      },
-      body: input.body ? JSON.stringify(input.body) : undefined
-    });
+    let response: Response;
+    try {
+      response = await fetch(`${this.baseUrl}${path}`, {
+        method: input.method,
+        headers: {
+          "Content-Type": "application/json",
+          "x-recorder-key": this.apiKey
+        },
+        body: input.body ? JSON.stringify(input.body) : undefined
+      });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Recorder is unavailable";
+      throw new RecorderRequestError(503, `Recorder connection failed: ${message}`, message);
+    }
 
     if (!response.ok) {
       const text = await response.text();
