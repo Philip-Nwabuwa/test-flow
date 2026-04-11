@@ -2,6 +2,9 @@ FROM mcr.microsoft.com/playwright:v1.48.0-jammy
 
 WORKDIR /workspace
 
+ENV DEBIAN_FRONTEND=noninteractive
+ENV TZ=Etc/UTC
+
 RUN apt-get update \
   && apt-get install -y --no-install-recommends xvfb x11vnc novnc \
   && rm -rf /var/lib/apt/lists/*

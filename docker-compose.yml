@@ -53,6 +53,9 @@ services:
     restart: unless-stopped
     env_file:
       - .env
+    environment:
+      DEBIAN_FRONTEND: noninteractive
+      TZ: Etc/UTC
     working_dir: /opt/automation
     entrypoint: []
     command:
