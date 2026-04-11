@@ -45,7 +45,8 @@ export function createApp(env: AppEnv): AppInstance {
     anonClient,
     env.SUPABASE_JWT_ISSUER,
     env.SUPABASE_JWT_AUDIENCE,
-    env.SUPABASE_JWKS_URL
+    env.SUPABASE_JWKS_URL,
+    env.SUPABASE_JWT_SECRET
   );
   const runQueue = createRunQueue(env.REDIS_URL);
   const redis = createRedisConnection(env.REDIS_URL);

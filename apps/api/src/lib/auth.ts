@@ -1,4 +1,4 @@
-import { createRemoteJWKSet, jwtVerify } from "jose";
+import { createRemoteJWKSet, decodeProtectedHeader, jwtVerify } from "jose";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { type AuthContext, throwIfError } from "@automation/shared";
@@ -10,28 +10,57 @@ interface VerifiedClaims {
   email?: string;
 }
 
+const textEncoder = new TextEncoder();
+
 export class AuthService {
   private readonly jwks;
+  private readonly jwtSecretKey?: Uint8Array;
 
   constructor(
     private readonly supabase: SupabaseClient,
     private readonly issuer: string,
     private readonly audience: string,
-    jwksUrl: string
+    jwksUrl: string,
+    jwtSecret?: string
   ) {
     this.jwks = createRemoteJWKSet(new URL(jwksUrl));
+    this.jwtSecretKey = jwtSecret ? textEncoder.encode(jwtSecret) : undefined;
   }
 
   async verifyToken(token: string): Promise<VerifiedClaims> {
-    const { payload } = await jwtVerify(token, this.jwks, {
-      issuer: this.issuer,
-      audience: this.audience
-    });
+    try {
+      const header = decodeProtectedHeader(token);
+      const payload = await (async () => {
+        if (typeof header.alg === "string" && header.alg.startsWith("HS")) {
+          if (!this.jwtSecretKey) {
+            throw new HttpError(401, "Unsupported bearer token algorithm");
+          }
 
-    return {
-      sub: String(payload.sub),
-      email: typeof payload.email === "string" ? payload.email : undefined
-    };
+          const result = await jwtVerify(token, this.jwtSecretKey, {
+            issuer: this.issuer,
+            audience: this.audience
+          });
+          return result.payload;
+        }
+
+        const result = await jwtVerify(token, this.jwks, {
+          issuer: this.issuer,
+          audience: this.audience
+        });
+        return result.payload;
+      })();
+
+      return {
+        sub: String(payload.sub),
+        email: typeof payload.email === "string" ? payload.email : undefined
+      };
+    } catch (error) {
+      if (error instanceof HttpError) {
+        throw error;
+      }
+
+      throw new HttpError(401, "Invalid bearer token");
+    }
   }
 
   async resolveContext(token: string): Promise<AuthContext> {

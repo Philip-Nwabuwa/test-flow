@@ -7,6 +7,7 @@ const envSchema = z.object({
   SUPABASE_URL: z.string().url(),
   SUPABASE_ANON_KEY: z.string().min(1),
   SUPABASE_JWKS_URL: z.string().url(),
+  SUPABASE_JWT_SECRET: z.string().min(1).optional(),
   SUPABASE_JWT_ISSUER: z.string().url(),
   SUPABASE_JWT_AUDIENCE: z.string().min(1).default("authenticated"),
   PLAYWRIGHT_IMAGE: z.string().min(1),
